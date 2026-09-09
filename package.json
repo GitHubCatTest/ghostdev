@@ -1,0 +1,48 @@
+{
+  "name": "ghostdev",
+  "version": "0.1.0",
+  "description": "Find and slay zombie dev servers, idle VMs, and memory leaks on macOS.",
+  "author": "GitHubCatTest",
+  "license": "MIT",
+  "keywords": [
+    "macos",
+    "dev-server",
+    "zombie-process",
+    "memory-leak",
+    "colima",
+    "docker",
+    "nextjs",
+    "vite",
+    "cli",
+    "ram-reaper"
+  ],
+  "bin": {
+    "ghostdev": "./dist/bin/ghostdev.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsx bin/ghostdev.ts",
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
