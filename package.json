@@ -1,7 +1,7 @@
 {
   "name": "ghostdev",
   "version": "0.1.0",
-  "description": "Find and slay zombie dev servers, idle VMs, and memory leaks on macOS.",
+  "description": "Find and kill zombie dev servers, idle VMs, and memory leaks on macOS.",
   "author": "GitHubCatTest",
   "license": "MIT",
   "keywords": [

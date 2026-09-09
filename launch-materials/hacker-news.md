@@ -6,13 +6,11 @@
 ### Text (First Comment):
 > Hi HN,
 > 
-> I built GhostDev after finding 11+ GB of memory trapped in ghost processes on my Mac:
+> Local dev stacks (web servers, API backends, watchers, container VMs) often linger in the background long after you switch tasks or close terminal tabs. Over time, these idle processes silently lock common ports, reserve gigabytes of RAM, or get stuck in runaway CPU loops.
 > 
-> - An idle Colima/Docker VM holding 8 GB of RAM with 0 running containers.
-> - An orphaned Next.js server running for 2 days pegged at 144% CPU.
-> - macOS Control Center leaking 1.8 GB over 5 days of uptime.
+> GhostDev is a lightweight macOS CLI that inspects active listening TCP ports, maps them to project directories across frameworks (Next.js, Vite, Django, Rails, FastAPI, Go, etc.), detects idle container VMs (Docker/Colima/Lima with zero active containers), and catches high-uptime system memory leaks.
 > 
-> GhostDev is a lightweight CLI that scans active listening ports (3000, 5173, 8080, etc.), maps them to project directories (Next.js, Vite, Django, Rails, etc.), detects empty container VMs, and safely stops them.
+> *(In my first real-world run, it freed over 11 GB of RAM and stopped a runaway CPU loop).*
 > 
 > You can try it directly without installing:
 > ```bash

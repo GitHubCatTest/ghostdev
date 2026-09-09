@@ -1,7 +1,7 @@
 # 👻 GhostDev
 
-> **Find and slay zombie dev servers, idle VMs, and memory leaks on macOS.**  
-> Reclaim 10+ GB of RAM and stop runaway CPU cycles with a single command.
+> **Find and kill zombie dev servers, idle VMs, and memory leaks on macOS.**  
+> Reclaim gigabytes of wasted RAM and stop runaway CPU cycles with a single command.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node: >=18](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
@@ -11,19 +11,18 @@
 
 ## The Problem
 
-You run `pnpm dev`, `colima start`, or `docker compose up`, switch tasks, close the terminal tab, or shut your laptop lid. 
+Modern developers constantly spin up local services across multiple projects: web frameworks, API backends, file watchers, containers, and virtual machines. When you switch projects, close terminal tabs, or shut your laptop lid, many of these processes never actually exit:
 
-Days later:
-- A forgotten **Next.js server** is burning **144% CPU** in an infinite rebuild loop.
-- An idle **Colima/Lima VM** is holding **8 GB of reserved RAM** with **0 active containers**.
-- Abandoned **Vite/Node/Python** servers are blocking ports like `3000` and `8080`.
-- macOS **Control Center** has leaked **1.8 GB of RAM** over 5 days of uptime.
+- **Lingering Dev Servers:** Next.js, Vite, Django, Rails, FastAPI, Go, and Node servers stay running in the background, locking common ports (`3000`, `5173`, `8080`) and consuming gigabytes of RAM.
+- **Runaway Rebuild Loops:** Hot-module-reload watchers or bundlers getting stuck in infinite loops, pegging CPU cores at 100%+ and draining battery.
+- **Idle Virtual Machines:** Docker Desktop, Colima, or Lima VMs reserving 4–16 GB of system RAM even when zero containers or workloads are active.
+- **System Memory Leaks:** Long-running macOS daemons (like Control Center or UI helpers) slowly leaking memory and handles over days of uptime.
 
-**GhostDev finds these ghost processes and reclaims your memory instantly.**
+**GhostDev automatically scans for these abandoned processes, calculates your recoverable memory, and safely frees it.**
 
 ---
 
-## Terminal Preview
+## Example Scan Output
 
 ```text
 $ npx ghostdev scan

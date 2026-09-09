@@ -6,17 +6,18 @@
 
 ## 1. Reddit (r/macapps, r/webdev, r/reactjs, r/nextjs)
 
-**Title:** I built an open-source CLI to find & kill zombie dev servers and idle Docker VMs eating your Mac's RAM (`ghostdev`)
+**Title:** I built an open-source CLI to find & kill zombie dev servers, idle VMs, and memory leaks on macOS (`ghostdev`)
 
 **Post:**
-> Dev servers love to keep running in the background when you close terminal tabs or laptop lids.
+> Local dev stacks (web servers, API backends, watchers, container VMs) love to keep running in the background when you switch projects, close terminal tabs, or shut your laptop lid.
 > 
-> Earlier today I realized my Mac was lagging because:
-> - An idle Docker/Colima VM was reserving **8 GB of RAM** with 0 containers running.
-> - An orphaned Next.js dev server from 2 days ago was stuck in an infinite rebuild loop eating **144% CPU** and **1.5 GB RAM**.
-> - macOS Control Center had leaked **1.8 GB** over 5 days of uptime.
+> Over time, this quietly drains your machine:
+> - **Lingering dev servers:** Next.js, Vite, Django, Rails, FastAPI, Go, and Node servers holding onto ports like 3000/8080 and eating gigabytes of RAM.
+> - **Runaway rebuild loops:** Watchers or bundlers stuck in loops burning 100%+ CPU and killing battery life.
+> - **Idle VMs & containers:** Docker, Colima, or Lima VMs reserving 4–16 GB of memory with zero active containers.
+> - **System memory leaks:** Long-uptime macOS daemons leaking memory and handles over days of uptime.
 >
-> That was **11+ GB of memory** held hostage by processes I wasn't even using.
+> *(In my own real-world test today, an idle container VM and a couple forgotten dev servers had quietly trapped over 11 GB of RAM!)*
 >
 > So I built **GhostDev** — a lightweight, zero-dependency macOS CLI that finds these ghost processes and reclaims your RAM:
 >
@@ -24,7 +25,7 @@
 > # 1. Scan for wasted RAM (takes <50ms)
 > npx ghostdev scan
 > 
-> # 2. Preview what would be stopped
+> # 2. Preview what would be stopped (safe dry-run)
 > npx ghostdev reap --dry-run
 > 
 > # 3. Free the memory
@@ -33,7 +34,8 @@
 >
 > **GitHub (MIT Open Source):** https://github.com/GitHubCatTest/ghostdev
 >
-> - **100% Offline & Private:** No LLMs, no cloud APIs, no analytics. All checks run locally via native OS queries.
+> - **Broad stack support:** Next.js, Vite, Nuxt, Astro, Remix, Django, FastAPI, Rails, Docker/Lima/Colima VMs, etc.
+> - **100% Offline & Private:** No LLMs, no cloud APIs, no analytics. Runs locally in <50ms via native OS calls.
 > - **Safe:** Whitelists browsers, text editors, and language servers so you never lose active work.
 >
 > Hope it saves your RAM and battery life!
@@ -42,17 +44,14 @@
 
 ## 2. X / Twitter (Short & Punchy)
 
-> Dev servers linger forever when you close terminal tabs.
+> Local dev servers & container VMs linger forever when you close terminal tabs or switch projects.
 > 
-> Found 11+ GB of RAM trapped on my Mac today:
-> • 8.0 GB: Colima VM with 0 containers
-> • 1.5 GB: Orphaned Next.js server at 144% CPU
-> • 1.8 GB: Leaking macOS Control Center
-> 
-> Built an open-source CLI to slay them:
+> Built a lightweight open-source macOS CLI to find and kill them:
 > 
 > `npx ghostdev scan`
 > `npx ghostdev reap`
+> 
+> Supports Next.js, Vite, Django, Rails, Docker/Colima VMs & more. (Freed 11+ GB on my first run!)
 > 
 > 🔗 https://github.com/GitHubCatTest/ghostdev 👻
 
