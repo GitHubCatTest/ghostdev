@@ -7,6 +7,10 @@ import { ScanOptions, ReapOptions } from '../types.js';
 
 export async function scanCommand(options: ScanOptions = {}): Promise<void> {
   const result = await runFullScan(options);
+  if (options.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
   console.log(formatScanResult(result));
 }
 
@@ -14,11 +18,19 @@ export async function reapCommand(options: ReapOptions = {}): Promise<void> {
   const scanResult = await runFullScan(options);
 
   if (scanResult.items.length === 0) {
+    if (options.json) {
+      console.log(JSON.stringify({ reaped: [], failed: [], bytesReclaimed: 0, formattedReclaimed: '0 B' }, null, 2));
+      return;
+    }
     console.log(formatScanResult(scanResult));
     return;
   }
 
   const reapResult = await reapProcesses(scanResult.items, options);
+  if (options.json) {
+    console.log(JSON.stringify(reapResult, null, 2));
+    return;
+  }
   console.log(
     formatReapResult(
       reapResult.reaped,

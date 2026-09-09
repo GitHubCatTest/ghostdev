@@ -15,11 +15,13 @@ program
   .option('-u, --min-uptime <hours>', 'Minimum process uptime in hours to consider idle', '1')
   .option('-m, --min-memory <mb>', 'Minimum memory in MB to consider', '50')
   .option('--no-leaks', 'Exclude macOS system memory leaks like Control Center')
+  .option('-j, --json', 'Output results as JSON')
   .action(async (opts) => {
     await scanCommand({
       minUptimeHours: parseFloat(opts.minUptime),
       minMemoryMb: parseFloat(opts.minMemory),
       includeLeaks: opts.leaks,
+      json: opts.json,
     });
   });
 
@@ -30,12 +32,14 @@ program
   .option('-u, --min-uptime <hours>', 'Minimum process uptime in hours to reap', '1')
   .option('-m, --min-memory <mb>', 'Minimum memory in MB to reap', '50')
   .option('--no-leaks', 'Exclude macOS system memory leaks')
+  .option('-j, --json', 'Output results as JSON')
   .action(async (opts) => {
     await reapCommand({
       dryRun: opts.dryRun,
       minUptimeHours: parseFloat(opts.minUptime),
       minMemoryMb: parseFloat(opts.minMemory),
       includeLeaks: opts.leaks,
+      json: opts.json,
     });
   });
 

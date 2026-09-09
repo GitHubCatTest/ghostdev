@@ -37,6 +37,7 @@ export interface ScanOptions {
   minUptimeHours?: number;
   minMemoryMb?: number;
   includeLeaks?: boolean;
+  json?: boolean;
 }
 
 export interface ReapOptions extends ScanOptions {

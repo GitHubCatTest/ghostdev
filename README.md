@@ -95,6 +95,18 @@ ghostdev daemon install --interval 30 --threshold 2048
 ghostdev daemon uninstall
 ```
 
+### 👻 5. Native macOS Menu Bar App (`GhostDev.app`)
+Prefer a GUI over the terminal? GhostDev includes an ultra-lightweight, native Swift menu bar application that sits in your top macOS menu bar:
+- **Live RAM Gauge:** Shows a 👻 icon and live wasted memory in your menu bar (e.g. `👻 5.2 GB`).
+- **One-Click Kill:** Click the icon to view detected processes and stop individual servers or click **"Free All Memory"** with a single click.
+- **100% Free & Open Source:** Ad-hoc codesigned natively—no Apple Developer fees or subscriptions needed.
+
+```bash
+# Build and launch the native menu bar app
+npm run build:app
+open menubar/GhostDev.app
+```
+
 ---
 
 ## CLI Reference

@@ -29,6 +29,7 @@
   "scripts": {
     "dev": "tsx bin/ghostdev.ts",
     "build": "tsc",
+    "build:app": "bash menubar/build.sh",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
