@@ -15,6 +15,7 @@
 When you close code editor windows or terminal tabs, your local servers and container environments often don't actually stop. Days later, they're still secretly running in the background:
 
 - **Forgotten dev servers** (Next.js, Vite, Python, Rails, Node) quietly eating 5–10+ GB of RAM.
+- **AI Coding Agent leftovers** (Cursor, Claude Code, Windsurf, etc.): When AI agents test your code, they spin up background servers. If a port is blocked or you start a new task, agents rarely close the old ones; they just start new ones on ports 3001, 3002, or 8081.
 - **Watchers and bundlers** stuck in runaway loops burning 100%+ CPU and draining your battery.
 - **Docker or Colima VMs** holding onto 8 GB of reserved memory even with **0 containers running**.
 

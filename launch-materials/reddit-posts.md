@@ -49,3 +49,29 @@
 
 * **Short & Direct (Great for r/macapps):**  
   *If your Mac is running warm or losing battery while coding, here's a free tool to clean up forgotten background servers.*
+
+---
+
+## 🤖 Post for X (Focused on Coding with AI Agents)
+
+```text
+If you code with AI (Cursor, Claude Code, etc.), check your Mac's background processes.
+
+When AI agents test code, they spin up background servers.
+
+If port 3000 is busy or you start a new prompt, they rarely close the old server.
+
+They just start a new one on port 3001, 3002, or 8081.
+
+Unless you explicitly tell them to kill it, those old servers keep running silently in the background for days.
+
+Found 11GB of trapped RAM and a 144% CPU loop on my Mac today from this.
+
+Built a free, open source tool to find and clean them up:
+
+npx ghostdev scan
+npx ghostdev reap
+
+Available as a CLI or a native macOS Menu Bar app:
+https://github.com/GitHubCatTest/ghostdev
+```
