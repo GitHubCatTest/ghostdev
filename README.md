@@ -11,6 +11,7 @@
 
 ## Why GhostDev?
 
+**🚨 WHAT IS GHOSTDEV? (IN PLAIN ENGLISH):**  
 When you close code editor windows or terminal tabs, your local servers and container environments often don't actually stop. Days later, they're still secretly running in the background:
 
 - **Forgotten dev servers** (Next.js, Vite, Python, Rails, Node) quietly eating 5–10+ GB of RAM.
