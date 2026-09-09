@@ -116,8 +116,8 @@ export async function scanDevServers(options: ScanOptions = {}): Promise<ZombieI
     }
 
     // Detect framework & project info
-    const { framework, name: baseName } = detectFrameworkAndName(command, ports);
     const cwd = await getProcessCwd(pid);
+    const { framework, name: baseName } = detectFrameworkAndName(command, ports, cwd);
     const projectName = cwd ? path.basename(cwd) : undefined;
     const displayName = projectName
       ? `${projectName} (${framework || baseName})`
@@ -156,11 +156,14 @@ export async function scanDevServers(options: ScanOptions = {}): Promise<ZombieI
   return items;
 }
 
-function detectFrameworkAndName(command: string, ports: number[]): { framework?: string; name: string } {
+import fs from 'node:fs';
+
+function detectFrameworkAndName(command: string, ports: number[], cwd?: string): { framework?: string; name: string } {
   const lower = command.toLowerCase();
 
-  if (lower.includes('next-server') || lower.includes('next dev')) {
-    return { framework: 'Next.js', name: 'Next.js Server' };
+  // 1. Check command line indicators
+  if (lower.includes('next-server') || lower.includes('next dev') || lower.includes('next/dist')) {
+    return { framework: 'Next.js', name: 'Next.js Dev Server' };
   }
   if (lower.includes('vite') || ports.includes(5173)) {
     return { framework: 'Vite', name: 'Vite Dev Server' };
@@ -194,6 +197,28 @@ function detectFrameworkAndName(command: string, ports: number[]): { framework?:
   }
   if (lower.includes('esbuild')) {
     return { framework: 'esbuild', name: 'esbuild watcher' };
+  }
+
+  // 2. Check project directory files (package.json, manage.py)
+  if (cwd) {
+    try {
+      const pkgPath = path.join(cwd, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkgStr = fs.readFileSync(pkgPath, 'utf8');
+        if (pkgStr.includes('"next"')) return { framework: 'Next.js', name: 'Next.js Server' };
+        if (pkgStr.includes('"vite"')) return { framework: 'Vite', name: 'Vite Server' };
+        if (pkgStr.includes('"nuxt"')) return { framework: 'Nuxt', name: 'Nuxt Server' };
+        if (pkgStr.includes('"astro"')) return { framework: 'Astro', name: 'Astro Server' };
+        if (pkgStr.includes('"@remix-run')) return { framework: 'Remix', name: 'Remix Server' };
+        if (pkgStr.includes('"express"')) return { framework: 'Express', name: 'Express Server' };
+        if (pkgStr.includes('"fastify"')) return { framework: 'Fastify', name: 'Fastify Server' };
+      }
+      if (fs.existsSync(path.join(cwd, 'manage.py'))) {
+        return { framework: 'Django', name: 'Django Server' };
+      }
+    } catch {
+      // Ignore read errors
+    }
   }
 
   const execBase = path.basename(command.split(/\s+/)[0]);
