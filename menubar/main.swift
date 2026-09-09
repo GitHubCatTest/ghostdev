@@ -43,8 +43,8 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let potentialPaths = [
             "/usr/local/bin/ghostdev",
             "/opt/homebrew/bin/ghostdev",
-            NSString(string: "~/.gemini/antigravity/scratch/ghostdev/dist/bin/ghostdev.js").expandingTildeInPath,
-            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("../dist/bin/ghostdev.js").path
+            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("../dist/bin/ghostdev.js").path,
+            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("dist/bin/ghostdev.js").path
         ]
         for p in potentialPaths {
             if FileManager.default.fileExists(atPath: p) {
@@ -58,7 +58,7 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.title = "👻"
-            button.toolTip = "GhostDev — Zombie Dev Server & VM Reaper"
+            button.toolTip = "GhostDev: Forgotten Dev Server & VM Reaper"
         }
         
         menu = NSMenu()
@@ -197,7 +197,7 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             
             for item in result.items {
                 let portInfo = item.ports.isEmpty ? "" : " :\(item.ports.map(String.init).joined(separator: ", :"))"
-                let title = "\(item.name)\(portInfo) — \(item.rssFormatted)"
+                let title = "\(item.name)\(portInfo) • \(item.rssFormatted)"
                 
                 let processItem = NSMenuItem(title: title, action: nil, keyEquivalent: "")
                 processItem.representedObject = item

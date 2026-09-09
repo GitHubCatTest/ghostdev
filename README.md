@@ -14,7 +14,7 @@
 **🚨 WHAT IS GHOSTDEV? (IN PLAIN ENGLISH):**  
 When you close code editor windows or terminal tabs, your local servers and container environments often don't actually stop. Days later, they're still secretly running in the background:
 
-- **Forgotten dev servers** (Next.js, Vite, Python, Rails, Node) quietly eating 5–10+ GB of RAM.
+- **Forgotten dev servers** (Next.js, Vite, Python, Rails, Node) quietly eating 5-10+ GB of RAM.
 - **AI Coding Agent leftovers** (Cursor, Claude Code, Windsurf, etc.): When AI agents test your code, they spin up background servers. If a port is blocked or you start a new task, agents rarely close the old ones; they just start new ones on ports 3001, 3002, or 8081.
 - **Watchers and bundlers** stuck in runaway loops burning 100%+ CPU and draining your battery.
 - **Docker or Colima VMs** holding onto 8 GB of reserved memory even with **0 containers running**.
@@ -49,37 +49,39 @@ Unlike standard Activity Monitor (which just shows a mystery `node` process) or 
 
 ---
 
-## Two Ways to Use GhostDev
+## ⚡ HOW TO INSTALL & RUN (SUPER SIMPLE)
 
-### 1. 👻 Native Menu Bar App (GUI)
-*For people who don't want to use the terminal.*
+Pick whichever option you prefer:
 
-A native, lightweight (<10 MB RAM) Mac menu bar app that sits at the top of your screen:
-- **Live Memory Badge:** Displays wasted RAM at a glance (e.g. `👻 5.2 GB`).
-- **One-Click Stop:** Click the icon to view running servers and stop individual projects or click **"Free All Memory"**.
-- **100% Free & Open Source:** Built in native Swift—no subscriptions or Apple fees required.
+### Option 1: Quick Scan in Terminal (Zero Install)
+You don't need to download or install anything. Just open your Mac's **Terminal** app, paste this command, and press **Enter**:
 
 ```bash
-# Build and launch the menu bar app
-npm run build:app
-open menubar/GhostDev.app
+npx ghostdev scan
+```
+
+To safely kill forgotten servers and get your RAM back:
+```bash
+npx ghostdev reap
 ```
 
 ---
 
-### 2. ⚡ Terminal CLI (Zero Install)
-*For developers who prefer the command line.*
+### Option 2: Native Menu Bar App (GUI)
+*If you want a 👻 ghost icon at the top of your Mac screen that tracks wasted memory in real time and lets you kill servers with one click.*
+
+1. Open your Mac's **Terminal** app.
+2. Copy and paste this single line, then press **Enter**:
 
 ```bash
-# 1. Scan for wasted memory (<50ms)
-npx ghostdev scan
-
-# 2. Preview what would be stopped (safe dry-run)
-npx ghostdev reap --dry-run
-
-# 3. Stop them and free your memory
-npx ghostdev reap
+git clone https://github.com/GitHubCatTest/ghostdev.git && cd ghostdev && bash menubar/build.sh && open menubar/GhostDev.app
 ```
+
+**And you're all set!** The 👻 icon will immediately appear in your top menu bar.
+
+- **Live Memory Badge:** Displays wasted RAM at a glance (e.g. `👻 5.2 GB`).
+- **One-Click Kill:** Click the icon to view running servers and kill individual projects or click **"Free All Memory"**.
+- **100% Free & Open Source:** Built in native Swift (no subscriptions or Apple fees).
 
 ---
 
