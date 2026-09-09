@@ -18,7 +18,33 @@ When you close code editor windows or terminal tabs, your local servers and cont
 - **Watchers and bundlers** stuck in runaway loops burning 100%+ CPU and draining your battery.
 - **Docker or Colima VMs** holding onto 8 GB of reserved memory even with **0 containers running**.
 
-**GhostDev finds these background processes and frees your memory in one click.**
+Unlike standard Activity Monitor (which just shows a mystery `node` process) or simple port killers (which only know a port number), GhostDev gives you the full picture.
+
+### ⚙️ How It Works Under the Hood (3 Simple Steps):
+
+1. **Finds the real project folder:**  
+   GhostDev inspects the process and finds the exact folder on your disk where you ran the command. So instead of a mystery `node` process, it reads the folder name (like `dashboard` or `landing-page`) and detects the framework (`Next.js`, `Vite`, etc.).
+
+2. **Checks how long it has been running:**  
+   It tracks process uptime (e.g. `up 2d 7h`). If it's been running for days and the terminal window you started it in was closed, it flags it as a forgotten process.
+
+3. **Checks if it's actually doing anything useful:**  
+   - **For Docker / VMs:** It checks if any containers are actively running. If it's `0`, it knows the VM is just holding onto 8 GB of RAM for nothing.
+   - **For CPU loops:** It checks if a build watcher is stuck in an infinite loop eating 100%+ CPU while you aren't using it.
+
+```text
+[DEV SERVER]   1.47 GB   my-web-app (Next.js)  :3000 (PID 45145)
+               ↳ Runaway CPU (144%) pegged in build loop • up 2d 7h
+
+[VM / DOCKER]  8.02 GB   Colima VM (Docker Runtime)
+               ↳ 0 active Docker containers (idle RAM reservation) • up 3d 2h
+```
+
+**You can immediately see:**
+- **What project it is** (e.g. `my-web-app` instead of just `node`)
+- **What port it's using** (e.g. `:3000`)
+- **How long it's been running** (e.g. `up 2d 7h`)
+- **Why it's safe to stop** (e.g. `0 containers running` or `runaway CPU loop`)
 
 ---
 
@@ -52,25 +78,6 @@ npx ghostdev reap --dry-run
 
 # 3. Stop them and free your memory
 npx ghostdev reap
-```
-
-```text
-👻 GhostDev v0.1.0 — macOS Zombie Dev Server & VM Reaper
-
-  Found 3 idle processes holding 10.97 GB of memory:
-
-  [VM / DOCKER]     8.02 GB  Colima VM (Docker Runtime)
-                   ↳ 0 active Docker containers (idle RAM reservation) • up 3d 2h
-
-  [DEV SERVER]      1.47 GB  my-web-app (Next.js)  :3000 (PID 45145)
-                   ↳ Runaway CPU (144%) pegged in build loop • up 2d 7h
-
-  [SYSTEM LEAK]     1.48 GB  macOS Control Center (PID 1270)
-                   ↳ Memory leak over 5d uptime • up 5d 1h
-
-  ────────────────────────────────────────────────────────────────────────
-  Total Reclaimable Memory: 10.97 GB
-  Run ghostdev reap to safely free this RAM.
 ```
 
 ---
