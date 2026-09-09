@@ -6,7 +6,7 @@ const program = new Command();
 
 program
   .name('ghostdev')
-  .description('Find and kill zombie dev servers, idle VMs, and memory leaks on macOS.')
+  .description('Stop hidden background servers from slowing down your Mac, heating it up, and draining your battery.')
   .version('0.1.0');
 
 program

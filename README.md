@@ -1,6 +1,6 @@
 # 👻 GhostDev
 
-> **Free your Mac's RAM and battery from forgotten coding projects.**  
+> **Stop hidden background servers from slowing down your Mac, heating it up, and draining your battery.**  
 > Available as a **native macOS Menu Bar app** and a **zero-install CLI**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
