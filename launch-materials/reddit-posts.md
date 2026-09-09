@@ -1,70 +1,51 @@
-# Short & Concise Launch Drafts (100% Privacy Safe)
-
-> **Privacy Check:** Contains zero private paths, zero usernames, zero project names, and zero credentials.
+# Plain-English Launch Drafts (High Retention & Relatable)
 
 ---
 
-## 1. Reddit (r/macapps, r/webdev, r/reactjs, r/nextjs)
+## 🎯 Best All-Round Title (Pain-Point Hook)
+**Title:**
+> **Mac running hot or battery draining fast while coding? You probably have gigabytes of forgotten background processes.**
 
-**Title:** I built an open-source CLI to find & kill zombie dev servers, idle VMs, and memory leaks on macOS (`ghostdev`)
+---
 
-**Post:**
-> Local dev stacks (web servers, API backends, watchers, container VMs) love to keep running in the background when you switch projects, close terminal tabs, or shut your laptop lid.
-> 
-> Over time, this quietly drains your machine:
-> - **Lingering dev servers:** Next.js, Vite, Django, Rails, FastAPI, Go, and Node servers holding onto ports like 3000/8080 and eating gigabytes of RAM.
-> - **Runaway rebuild loops:** Watchers or bundlers stuck in loops burning 100%+ CPU and killing battery life.
-> - **Idle VMs & containers:** Docker, Colima, or Lima VMs reserving 4–16 GB of memory with zero active containers.
-> - **System memory leaks:** Long-uptime macOS daemons leaking memory and handles over days of uptime.
+## 📝 Post Body (Plain English, Clear, & Punchy)
+
+> You close your code editor, shut your terminal tabs, and walk away. But your Mac is still running warm, the fans kick in, and your battery drains twice as fast.
 >
-> *(In my own real-world test today, an idle container VM and a couple forgotten dev servers had quietly trapped over 11 GB of RAM!)*
+> **Why does this happen?**
+> When you work on web projects or containers (Next.js, Vite, Python, Docker, etc.), those background servers often don't actually stop when you close your tabs. They silently keep running in the background for days:
+> - Eating 5–10+ GB of your Mac's RAM.
+> - Getting stuck in runaway rebuild loops burning 100%+ CPU.
+> - Reserving gigabytes of memory even when you aren't using them.
 >
-> So I built **GhostDev** — a lightweight, zero-dependency macOS CLI that finds these ghost processes and reclaims your RAM:
+> *(In my own test today, an idle Docker VM and a couple old project servers were quietly trapping over **11 GB of RAM** and burning a full CPU core!)*
 >
+> I built **GhostDev** — a free, lightweight open-source tool that finds these hidden processes and safely frees your memory in seconds.
+>
+> ### How to use it:
+> Just run this in your Mac's Terminal (no install needed):
 > ```bash
-> # 1. Scan for wasted RAM (takes <50ms)
+> # 1. See what's secretly running and eating RAM
 > npx ghostdev scan
-> 
-> # 2. Preview what would be stopped (safe dry-run)
-> npx ghostdev reap --dry-run
-> 
-> # 3. Free the memory
+>
+> # 2. Safely stop them and reclaim your memory
 > npx ghostdev reap
 > ```
 >
-> **GitHub (MIT Open Source):** https://github.com/GitHubCatTest/ghostdev
+> **GitHub (Free & Open Source):** https://github.com/GitHubCatTest/ghostdev
 >
-> - **Broad stack support:** Next.js, Vite, Nuxt, Astro, Remix, Django, FastAPI, Rails, Docker/Lima/Colima VMs, etc.
-> - **100% Offline & Private:** No LLMs, no cloud APIs, no analytics. Runs locally in <50ms via native OS calls.
-> - **Safe:** Whitelists browsers, text editors, and language servers so you never lose active work.
+> - **Zero data loss:** It only stops the temporary local server. All your code, files, and git work stay 100% safe.
+> - **100% Private & Offline:** No AI, no cloud servers, no analytics. Runs in milliseconds using native Mac system calls.
+> - **Safe:** Never touches your open browser tabs or text editors.
 >
-> Hope it saves your RAM and battery life!
+> Hope this saves your battery and keeps your Mac running cool!
 
 ---
 
-## 2. X / Twitter (Short & Punchy)
+## 💡 Alternative Titles (Depending on Subreddit)
 
-> Local dev servers & container VMs linger forever when you close terminal tabs or switch projects.
-> 
-> Built a lightweight open-source macOS CLI to find and kill them:
-> 
-> `npx ghostdev scan`
-> `npx ghostdev reap`
-> 
-> Supports Next.js, Vite, Django, Rails, Docker/Colima VMs & more. (Freed 11+ GB on my first run!)
-> 
-> 🔗 https://github.com/GitHubCatTest/ghostdev 👻
+* **Story Hook (Great for r/webdev):**  
+  *My Mac was running hot and sluggish, and I found 11 GB of RAM trapped by old projects. So I built a free tool to fix it.*
 
----
-
-## 3. LinkedIn / Dev.to (Quick tip format)
-
-> **Quick Mac Tip for Developers:**
->
-> If your Mac is running warm or your battery is draining, check how many forgotten dev servers or idle container VMs are running in the background.
->
-> I built a lightweight open-source tool called **GhostDev** to scan and safely reap them in one command:
->
-> `npx ghostdev scan`
->
-> Free & open source on GitHub: https://github.com/GitHubCatTest/ghostdev
+* **Short & Direct (Great for r/macapps):**  
+  *If your Mac is running warm or losing battery while coding, here's a free tool to clean up forgotten background servers.*
