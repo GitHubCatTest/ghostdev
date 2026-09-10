@@ -1,7 +1,9 @@
 # 👻 GhostDev
 
-> **Stop hidden background servers from slowing down your Mac, heating it up, and draining your battery.**  
-> Available as a **native macOS Menu Bar app** and a **zero-install CLI**.
+> **The developer upgrade to macOS Activity Monitor.**  
+> Stop hidden background servers and idle VMs from slowing down your Mac, heating it up, and draining your battery.  
+> Built especially for fast-iterating developers and AI coding workflows (Cursor, Claude Code, Windsurf).  
+> Available as a **native macOS Menu Bar app** (GUI) and a **zero-install CLI**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://apple.com/macos)
@@ -9,29 +11,47 @@
 
 ---
 
-## Why GhostDev?
+## ⚡ Activity Monitor vs. GhostDev
 
-**🚨 WHAT IS GHOSTDEV? (IN PLAIN ENGLISH):**  
-When you close code editor windows or terminal tabs, your local servers and container environments often don't actually stop. Days later, they're still secretly running in the background:
+When your Mac starts getting warm or fans spin up, you open macOS Activity Monitor. But for developers, Activity Monitor has a massive blind spot:
 
-- **Forgotten dev servers** (Next.js, Vite, Python, Rails, Node) quietly eating 5-10+ GB of RAM.
-- **AI Coding Agent leftovers** (Cursor, Claude Code, Windsurf, etc.): When AI agents test your code, they spin up background servers. If a port is blocked or you start a new task, agents rarely close the old ones; they just start new ones on ports 3001, 3002, or 8081.
-- **Watchers and bundlers** stuck in runaway loops burning 100%+ CPU and draining your battery.
-- **Docker or Colima VMs** holding onto 8 GB of reserved memory even with **0 containers running**.
+| What You Need to Know | macOS Activity Monitor | 👻 GhostDev |
+| :--- | :--- | :--- |
+| **Process Name** | Just says `node` or `python3` | **`my-web-app`** (actual folder on disk) |
+| **Framework** | None | **Next.js, Vite, Django, Rails, etc.** |
+| **Port** | Hidden (must dig through 500 lines of open files) | **`:3000`**, **`:5173`**, **`:8000`** |
+| **Uptime & Idle Status** | Raw launch time | **`up 2d 7h`** (flags closed terminal tabs) |
+| **Docker / Colima VMs** | Mystery VM taking 8 GB RAM | **Flags when 0 containers are running** |
+| **Action** | Risky Force Quit (might kill active work) | **1-click safe kill for abandoned servers** |
 
-Unlike standard Activity Monitor (which just shows a mystery `node` process) or simple port killers (which only know a port number), GhostDev gives you the full picture.
+---
 
-### ⚙️ How It Works Under the Hood (3 Simple Steps):
+## 🤖 Why This Is Essential for AI Coding & Fast Workflows
 
-1. **Finds the real project folder:**  
-   GhostDev inspects the process and finds the exact folder on your disk where you ran the command. So instead of a mystery `node` process, it reads the folder name (like `dashboard` or `landing-page`) and detects the framework (`Next.js`, `Vite`, etc.).
+Modern development moves faster than ever. When building with AI coding assistants (like Cursor, Claude Code, or Windsurf) or multitasking across multiple client projects:
+
+1. **AI Port Jumping:** When AI agents test your code, they run terminal commands behind the scenes to spin up dev servers. If port 3000 is occupied, they silently jump to port 3001, 3002, or 8081. They rarely shut down the previous servers.
+2. **Invisible Background Leftovers:** Because agents and scripts run in the background, you never see the terminal windows. Days later, multiple servers are still running invisibly.
+3. **Where the 10+ GB Actually Goes:**  
+   - A modern Next.js 14/15 dev server (with in-memory Turbopack/Webpack compilation and AST caching) routinely consumes **1.2 GB to 2.5 GB of RAM**.
+   - A container runtime on macOS (Docker Desktop, Colima, Lima) reserves **4 to 8 GB of host RAM** by default in a Linux VM. Even if you shut down all containers, that VM keeps holding onto 8 GB of memory.
+   - **Result:** Just two forgotten dev servers plus an idle Docker VM locks up **over 11 GB of RAM** and can peg CPU cores in rebuild loops.
+
+GhostDev acts as a safety net: it tracks these processes down so you can iterate fast without having to manually babysit background PIDs.
+
+---
+
+## ⚙️ How It Works Under the Hood (3 Simple Steps)
+
+1. **Maps process to project folder:**  
+   GhostDev inspects the process and finds the exact folder on your disk where the command was run. Instead of a mystery `node` line, it reads the folder name (e.g. `dashboard` or `my-web-app`) and identifies the framework (`Next.js`, `Vite`, etc.).
 
 2. **Checks how long it has been running:**  
-   It tracks process uptime (e.g. `up 2d 7h`). If it's been running for days and the terminal window you started it in was closed, it flags it as a forgotten process.
+   It checks process uptime (e.g. `up 2d 7h`). If it has been running for days and the terminal tab or editor window you started it in was closed, it flags it as an abandoned process.
 
 3. **Checks if it's actually doing anything useful:**  
-   - **For Docker / VMs:** It checks if any containers are actively running. If it's `0`, it knows the VM is just holding onto 8 GB of RAM for nothing.
-   - **For CPU loops:** It checks if a build watcher is stuck in an infinite loop eating 100%+ CPU while you aren't using it.
+   - **For Docker / VMs:** Checks if any containers are actively running. If it's `0`, it flags that the VM is holding onto 8 GB of RAM for nothing.
+   - **For CPU loops:** Catches watchers stuck in runaway 100%+ CPU rebuild loops draining your battery.
 
 ```text
 [DEV SERVER]   1.47 GB   my-web-app (Next.js)  :3000 (PID 45145)
@@ -41,15 +61,9 @@ Unlike standard Activity Monitor (which just shows a mystery `node` process) or 
                ↳ 0 active Docker containers (idle RAM reservation) • up 3d 2h
 ```
 
-**You can immediately see:**
-- **What project it is** (e.g. `my-web-app` instead of just `node`)
-- **What port it's using** (e.g. `:3000`)
-- **How long it's been running** (e.g. `up 2d 7h`)
-- **Why it's safe to stop** (e.g. `0 containers running` or `runaway CPU loop`)
-
 ---
 
-## ⚡ HOW TO INSTALL & RUN (SUPER SIMPLE)
+## 🚀 HOW TO INSTALL & RUN (SUPER SIMPLE)
 
 Pick whichever option you prefer:
 
