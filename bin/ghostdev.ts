@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { scanCommand, reapCommand, notifyCommand, daemonCommand } from '../src/cli/commands.js';
+import { scanCommand, reapCommand, notifyCommand, daemonCommand, restartControlCenterCommand } from '../src/cli/commands.js';
 
 const program = new Command();
 
@@ -39,6 +39,19 @@ program
       minUptimeHours: parseFloat(opts.minUptime),
       minMemoryMb: parseFloat(opts.minMemory),
       includeLeaks: opts.leaks,
+      json: opts.json,
+    });
+  });
+
+program
+  .command('restart-control-center')
+  .alias('restart-cc')
+  .description('Safely restart macOS Control Center to free leaked memory without logging out')
+  .option('-d, --dry-run', 'Inspect current memory without restarting')
+  .option('-j, --json', 'Output result as JSON')
+  .action(async (opts) => {
+    await restartControlCenterCommand({
+      dryRun: opts.dryRun,
       json: opts.json,
     });
   });

@@ -2,7 +2,7 @@ import { ScanOptions, ScanResult, ZombieItem } from '../types.js';
 import { formatBytes } from '../utils.js';
 import { scanDevServers } from './devServers.js';
 import { scanVirtualMachines } from './virtualMachines.js';
-import { scanSystemLeaks } from './systemLeaks.js';
+import { scanSystemLeaks, getControlCenterInfo, checkControlCenterLeak } from './systemLeaks.js';
 
 export async function runFullScan(options: ScanOptions = {}): Promise<ScanResult> {
   const includeLeaks = options.includeLeaks ?? true;
@@ -28,4 +28,4 @@ export async function runFullScan(options: ScanOptions = {}): Promise<ScanResult
   };
 }
 
-export { scanDevServers, scanVirtualMachines, scanSystemLeaks };
+export { scanDevServers, scanVirtualMachines, scanSystemLeaks, getControlCenterInfo, checkControlCenterLeak };

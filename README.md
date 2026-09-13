@@ -95,6 +95,7 @@ git clone https://github.com/GitHubCatTest/ghostdev.git && cd ghostdev && bash m
 
 - **Live Memory Badge:** Displays wasted RAM at a glance (e.g. `👻 5.2 GB`).
 - **One-Click Kill:** Click the icon to view running servers and kill individual projects or click **"Free All Memory"**.
+- **Control Center Leak Alert & 1-Click Restart:** Automatically flags if macOS Control Center starts leaking memory (e.g. over 1 GB) and adds a dedicated button to restart it in milliseconds without logging out.
 - **100% Free & Open Source:** Built in native Swift (no subscriptions or Apple fees).
 
 ---
@@ -103,7 +104,7 @@ git clone https://github.com/GitHubCatTest/ghostdev.git && cd ghostdev && bash m
 
 - **Web & API Servers:** Next.js, Vite, Nuxt, Astro, Remix, Django, FastAPI, Flask, Ruby on Rails, Express, and Node/Python.
 - **Container VMs:** Colima, Lima, and Docker Desktop when **zero containers** are running.
-- **macOS System Leaks:** Long-uptime background services like Control Center.
+- **macOS System Leaks:** Detects when system background services like macOS Control Center leak memory (e.g. climbing past 1+ GB RAM) and provides an instant 1-click restart to reclaim memory.
 - **Protected Apps:** Automatically whitelists web browsers (Chrome, Safari, Arc), text editors (VS Code, Cursor), and IDE tools so you never lose active work.
 
 ---
@@ -115,7 +116,8 @@ git clone https://github.com/GitHubCatTest/ghostdev.git && cd ghostdev && bash m
 | `ghostdev scan` | Lists all idle dev servers, empty VMs, and wasted RAM. |
 | `ghostdev reap` | Safely stops identified background processes and frees RAM. |
 | `ghostdev reap --dry-run` | Previews what would be stopped without killing anything. |
-| `ghostdev notify -t <mb>` | Sends a native Mac notification if wasted RAM exceeds threshold (default: 2048 MB). |
+| `ghostdev restart-cc` | Restarts leaking macOS Control Center and reclaims leaked RAM (supports `--dry-run`). |
+| `ghostdev notify -t <mb>` | Sends a native Mac notification if wasted RAM exceeds threshold (default: 2048 MB) or if Control Center is leaking. |
 | `ghostdev daemon install` | Runs silently in the background and alerts you when RAM is wasted. |
 | `ghostdev daemon uninstall` | Removes the background service. |
 

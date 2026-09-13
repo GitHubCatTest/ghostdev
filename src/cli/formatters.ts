@@ -2,7 +2,7 @@ import pc from 'picocolors';
 import { ScanResult, ZombieItem } from '../types.js';
 
 export function formatHeader(): string {
-  return `\n${pc.bold(pc.cyan('👻 GhostDev'))} ${pc.dim('v0.1.0')} — macOS Zombie Dev Server & VM Reaper\n`;
+  return `\n${pc.bold(pc.cyan('👻 GhostDev'))} ${pc.dim('v0.1.0')} : macOS Dev Server & Memory Reaper\n`;
 }
 
 export function formatScanResult(result: ScanResult): string {
@@ -29,9 +29,17 @@ export function formatScanResult(result: ScanResult): string {
   lines.push(
     `  ${pc.bold('Total Reclaimable Memory:')} ${pc.bold(pc.green(result.totalRssFormatted))}`
   );
-  lines.push(
-    `  Run ${pc.cyan('ghostdev reap')} to safely free this RAM.\n`
-  );
+  
+  const hasSystemLeak = result.items.some((it) => it.type === 'memory-leak');
+  if (hasSystemLeak) {
+    lines.push(
+      `  Run ${pc.cyan('ghostdev restart-control-center')} to reset Control Center, or ${pc.cyan('ghostdev reap')} to free all.\n`
+    );
+  } else {
+    lines.push(
+      `  Run ${pc.cyan('ghostdev reap')} to safely free this RAM.\n`
+    );
+  }
 
   return lines.join('\n');
 }
@@ -87,7 +95,8 @@ export function formatReapResult(
     lines.push(pc.green(`  ✔ Successfully reaped ${pc.bold(reaped.length.toString())} processes!`));
     lines.push(`  Freed ${pc.bold(pc.green(totalReclaimed))} of RAM back to macOS:\n`);
     for (const item of reaped) {
-      lines.push(`  ${pc.green('✔')} ${item.name} ${pc.dim(`reclaimed ${item.rssFormatted}`)}`);
+      const verb = item.type === 'memory-leak' ? 'Restarted' : 'Stopped';
+      lines.push(`  ${pc.green('✔')} ${verb} ${item.name} ${pc.dim(`(reclaimed ${item.rssFormatted})`)}`);
     }
   }
 

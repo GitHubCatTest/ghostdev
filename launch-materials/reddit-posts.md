@@ -20,7 +20,7 @@
 >
 > *(In my own test today, an idle Docker VM and a couple old project servers were quietly trapping over **11 GB of RAM** and burning a full CPU core!)*
 >
-> I built **GhostDev** — a free, lightweight open-source tool that finds these hidden processes and safely frees your memory in seconds.
+> I built **GhostDev**: a free, lightweight open-source tool that finds these hidden processes and safely frees your memory in seconds.
 >
 > ### How to use it:
 > Just run this in your Mac's Terminal (no install needed):

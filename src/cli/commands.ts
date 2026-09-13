@@ -1,9 +1,10 @@
 import pc from 'picocolors';
-import { runFullScan } from '../scanners/index.js';
+import { runFullScan, getControlCenterInfo } from '../scanners/index.js';
 import { reapProcesses } from '../reaper/processReaper.js';
 import { sendMacNotification } from '../notifier/macosNotifier.js';
 import { formatScanResult, formatReapResult } from './formatters.js';
 import { ScanOptions, ReapOptions } from '../types.js';
+import { runCommand, formatBytes } from '../utils.js';
 
 export async function scanCommand(options: ScanOptions = {}): Promise<void> {
   const result = await runFullScan(options);
@@ -41,11 +42,105 @@ export async function reapCommand(options: ReapOptions = {}): Promise<void> {
   );
 }
 
+export async function restartControlCenterCommand(options: { dryRun?: boolean; json?: boolean } = {}): Promise<void> {
+  const info = await getControlCenterInfo();
+
+  if (!info) {
+    if (options.json) {
+      console.log(JSON.stringify({ success: false, error: 'Control Center process not found' }, null, 2));
+      return;
+    }
+    console.log(pc.yellow('⚠ Could not find a running macOS Control Center process.'));
+    return;
+  }
+
+  if (options.dryRun) {
+    if (options.json) {
+      console.log(JSON.stringify({ dryRun: true, pid: info.pid, rssBytes: info.rssBytes, rssFormatted: info.rssFormatted, isLeaking: info.isLeaking }, null, 2));
+      return;
+    }
+    console.log(pc.cyan(`\n[DRY RUN] macOS Control Center (PID ${info.pid}) is using ${pc.bold(info.rssFormatted)} RAM.`));
+    if (info.isLeaking) {
+      console.log(pc.yellow(`⚠ Status: LEAKING (${info.rssFormatted}, normal is ~50 MB). Would restart and free ~${info.rssFormatted}.\n`));
+    } else {
+      console.log(pc.green(`✔ Status: Normal memory usage.\n`));
+    }
+    return;
+  }
+
+  console.log(pc.bold(pc.cyan('\n🔄 Restarting macOS Control Center...')));
+  console.log(pc.dim(`Current PID: ${info.pid} • Memory: ${info.rssFormatted} (normal is ~50 MB)`));
+
+  const killRes = await runCommand('killall', ['ControlCenter']);
+  if (killRes.exitCode !== 0) {
+    if (options.json) {
+      console.log(JSON.stringify({ success: false, error: killRes.stderr || 'Failed to restart Control Center' }, null, 2));
+      return;
+    }
+    console.log(pc.red(`✖ Failed to restart Control Center: ${killRes.stderr || 'unknown error'}\n`));
+    return;
+  }
+
+  // Wait 600ms for launchd to cleanly respawn Control Center
+  await new Promise((r) => setTimeout(r, 600));
+
+  const newInfo = await getControlCenterInfo();
+  const reclaimedBytes = Math.max(0, info.rssBytes - (newInfo?.rssBytes ?? 0));
+  const reclaimedFormatted = formatBytes(reclaimedBytes);
+
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          success: true,
+          oldPid: info.pid,
+          newPid: newInfo?.pid,
+          oldRssFormatted: info.rssFormatted,
+          newRssFormatted: newInfo?.rssFormatted ?? 'unknown',
+          reclaimedBytes,
+          reclaimedFormatted,
+        },
+        null,
+        2
+      )
+    );
+    return;
+  }
+
+  console.log(pc.green(`✔ Control Center successfully restarted by macOS launchd!`));
+  if (newInfo) {
+    console.log(pc.dim(`  New PID: ${newInfo.pid} • Memory reset to: ${newInfo.rssFormatted}`));
+  }
+  if (reclaimedBytes > 100 * 1024 * 1024) {
+    console.log(pc.bold(pc.green(`🎉 Reclaimed ${reclaimedFormatted} of RAM!\n`)));
+  } else {
+    console.log(pc.green(`✔ Memory successfully refreshed.\n`));
+  }
+}
+
 export async function notifyCommand(options: { thresholdMb?: number } = {}): Promise<void> {
   const thresholdMb = options.thresholdMb ?? 2048; // default 2 GB
   const thresholdBytes = thresholdMb * 1024 * 1024;
 
   const result = await runFullScan();
+
+  // Check specifically for Control Center leak
+  const ccLeak = result.items.find(
+    (it) => it.type === 'memory-leak' && it.name.includes('Control Center')
+  );
+
+  if (ccLeak && (ccLeak.rssBytes >= 800 * 1024 * 1024 || ccLeak.rssBytes >= thresholdBytes)) {
+    await sendMacNotification({
+      title: '👻 GhostDev: Control Center Memory Leak',
+      subtitle: `Using ${ccLeak.rssFormatted} RAM (normal is ~50 MB)`,
+      message: `Click menu bar icon or run "ghostdev restart-control-center" to reclaim ${ccLeak.rssFormatted} instantly.`,
+      sound: 'Blow',
+    });
+    console.log(
+      pc.yellow(`🚨 Alert sent: macOS Control Center is leaking ${ccLeak.rssFormatted} RAM`)
+    );
+    return;
+  }
 
   if (result.totalRssBytes >= thresholdBytes && result.items.length > 0) {
     await sendMacNotification({
@@ -56,14 +151,15 @@ export async function notifyCommand(options: { thresholdMb?: number } = {}): Pro
     });
     console.log(pc.green(`✔ Notification sent (${result.totalRssFormatted} detected)`));
   } else {
-    console.log(pc.dim(`✔ Memory usage is below alert threshold (${result.totalRssFormatted} < ${thresholdMb} MB)`));
+    console.log(
+      pc.dim(`✔ Memory usage is below alert threshold (${result.totalRssFormatted} < ${thresholdMb} MB)`)
+    );
   }
 }
 
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'os';
-import { runCommand } from '../utils.js';
 
 export async function daemonCommand(options: { intervalMinutes?: number; thresholdMb?: number } = {}): Promise<void> {
   const interval = (options.intervalMinutes ?? 30) * 60 * 1000;

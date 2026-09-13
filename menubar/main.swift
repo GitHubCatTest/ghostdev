@@ -20,7 +20,6 @@ struct ZombieItem: Codable {
     }
 }
 
-// Swift uses lowercase String
 typealias string = String
 
 struct ScanResult: Codable {
@@ -35,30 +34,13 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var timer: Timer?
     var latestResult: ScanResult?
     var isScanning = false
-    
-    // Path to ghostdev CLI binary or fallback
-    var cliPath: String = {
-        let bundlePath = Bundle.main.bundlePath
-        // Check relative to app
-        let potentialPaths = [
-            "/usr/local/bin/ghostdev",
-            "/opt/homebrew/bin/ghostdev",
-            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("../dist/bin/ghostdev.js").path,
-            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("dist/bin/ghostdev.js").path
-        ]
-        for p in potentialPaths {
-            if FileManager.default.fileExists(atPath: p) {
-                return p
-            }
-        }
-        return "ghostdev"
-    }()
+    var lastCcNotificationDate: Date?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.title = "👻"
-            button.toolTip = "GhostDev: Forgotten Dev Server & VM Reaper"
+            button.toolTip = "GhostDev: Forgotten Dev Server & Memory Reaper"
         }
         
         menu = NSMenu()
@@ -81,7 +63,7 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(titleItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Scanning for zombie processes...", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Scanning for idle processes...", action: nil, keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         
         let quitItem = NSMenuItem(title: "Quit GhostDev", action: #selector(quitApp), keyEquivalent: "q")
@@ -101,8 +83,42 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self.isScanning = false
                 self.latestResult = result
                 self.updateMenu(with: result)
+                self.checkProactiveAlerts(result: result)
             }
         }
+    }
+    
+    func checkProactiveAlerts(result: ScanResult?) {
+        guard let result = result else { return }
+        if let cc = result.items.first(where: { $0.type == "memory-leak" && $0.name.contains("Control Center") }) {
+            // If leaking >= 800 MB and we haven't notified in the last 45 minutes
+            if cc.rssBytes >= 800 * 1024 * 1024 {
+                let shouldNotify: Bool
+                if let last = lastCcNotificationDate {
+                    shouldNotify = Date().timeIntervalSince(last) >= 2700
+                } else {
+                    shouldNotify = true
+                }
+                
+                if shouldNotify {
+                    lastCcNotificationDate = Date()
+                    sendNotification(
+                        title: "👻 GhostDev: Control Center Memory Leak",
+                        message: "Control Center is using \(cc.rssFormatted) RAM. Click the menu bar icon to restart it."
+                    )
+                }
+            }
+        }
+    }
+    
+    func sendNotification(title: String, message: String) {
+        let cleanTitle = title.replacingOccurrences(of: "\"", with: "\\\"")
+        let cleanMessage = message.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = "display notification \"\(cleanMessage)\" with title \"\(cleanTitle)\" sound name \"Blow\""
+        let task = Process()
+        task.launchPath = "/usr/bin/osascript"
+        task.arguments = ["-e", script]
+        try? task.run()
     }
     
     func findNodeExecutable() -> String {
@@ -123,20 +139,40 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return "/usr/bin/env"
     }
 
+    func findCliScriptPath() -> String? {
+        let bundlePath = Bundle.main.bundlePath
+        let candidates = [
+            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("../dist/bin/ghostdev.js").path,
+            URL(fileURLWithPath: bundlePath).deletingLastPathComponent().appendingPathComponent("dist/bin/ghostdev.js").path,
+            "\(NSHomeDirectory())/.gemini/antigravity/scratch/ghostdev/dist/bin/ghostdev.js",
+            "/usr/local/bin/ghostdev",
+            "/opt/homebrew/bin/ghostdev"
+        ]
+        for c in candidates {
+            if FileManager.default.fileExists(atPath: c) {
+                return c
+            }
+        }
+        return nil
+    }
+
     func executeScan() -> ScanResult? {
         let task = Process()
         let pipe = Pipe()
         let nodePath = findNodeExecutable()
-        let home = NSHomeDirectory()
-        let cliScript = "\(home)/.gemini/antigravity/scratch/ghostdev/dist/bin/ghostdev.js"
         
-        if FileManager.default.fileExists(atPath: cliScript) {
-            if nodePath == "/usr/bin/env" {
-                task.launchPath = "/usr/bin/env"
-                task.arguments = ["node", cliScript, "scan", "--json"]
+        if let cliScript = findCliScriptPath() {
+            if cliScript.hasSuffix(".js") {
+                if nodePath == "/usr/bin/env" {
+                    task.launchPath = "/usr/bin/env"
+                    task.arguments = ["node", cliScript, "scan", "--json"]
+                } else {
+                    task.launchPath = nodePath
+                    task.arguments = [cliScript, "scan", "--json"]
+                }
             } else {
-                task.launchPath = nodePath
-                task.arguments = [cliScript, "scan", "--json"]
+                task.launchPath = cliScript
+                task.arguments = ["scan", "--json"]
             }
         } else {
             task.launchPath = "/usr/bin/env"
@@ -186,6 +222,30 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             button.title = "👻 \(result.totalRssFormatted)"
             
+            // Check if Control Center is leaking specifically
+            if let ccLeak = result.items.first(where: { $0.type == "memory-leak" && $0.name.contains("Control Center") }) {
+                let ccAlertItem = NSMenuItem(
+                    title: "🚨 Control Center Leaking: \(ccLeak.rssFormatted)",
+                    action: nil,
+                    keyEquivalent: ""
+                )
+                ccAlertItem.attributedTitle = NSAttributedString(
+                    string: "🚨 Control Center Leaking: \(ccLeak.rssFormatted)",
+                    attributes: [.font: NSFont.boldSystemFont(ofSize: 12), .foregroundColor: NSColor.systemRed]
+                )
+                ccAlertItem.isEnabled = false
+                menu.addItem(ccAlertItem)
+                
+                let restartCcBtn = NSMenuItem(
+                    title: "🔄 Restart Control Center (Free \(ccLeak.rssFormatted))",
+                    action: #selector(restartControlCenterAction),
+                    keyEquivalent: ""
+                )
+                restartCcBtn.target = self
+                menu.addItem(restartCcBtn)
+                menu.addItem(NSMenuItem.separator())
+            }
+            
             let summaryItem = NSMenuItem(
                 title: "Found \(result.items.count) idle processes (\(result.totalRssFormatted) wasted)",
                 action: nil,
@@ -202,7 +262,6 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 let processItem = NSMenuItem(title: title, action: nil, keyEquivalent: "")
                 processItem.representedObject = item
                 
-                // Submenu for killing this specific process
                 let subMenu = NSMenu()
                 let reasonItem = NSMenuItem(title: item.reason, action: nil, keyEquivalent: "")
                 reasonItem.isEnabled = false
@@ -213,10 +272,25 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 subMenu.addItem(statsItem)
                 
                 subMenu.addItem(NSMenuItem.separator())
-                let killItem = NSMenuItem(title: "Stop & Free \(item.rssFormatted)", action: #selector(killSingleItem(_:)), keyEquivalent: "")
-                killItem.target = self
-                killItem.representedObject = item
-                subMenu.addItem(killItem)
+                
+                if item.type == "memory-leak" && item.name.contains("Control Center") {
+                    let restartItem = NSMenuItem(
+                        title: "🔄 Restart Control Center & Free \(item.rssFormatted)",
+                        action: #selector(restartControlCenterAction),
+                        keyEquivalent: ""
+                    )
+                    restartItem.target = self
+                    subMenu.addItem(restartItem)
+                } else {
+                    let killItem = NSMenuItem(
+                        title: "Stop & Free \(item.rssFormatted)",
+                        action: #selector(killSingleItem(_:)),
+                        keyEquivalent: ""
+                    )
+                    killItem.target = self
+                    killItem.representedObject = item
+                    subMenu.addItem(killItem)
+                }
                 
                 processItem.submenu = subMenu
                 menu.addItem(processItem)
@@ -247,8 +321,34 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(quitItem)
     }
     
+    @objc func restartControlCenterAction() {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            let task = Process()
+            task.launchPath = "/usr/bin/killall"
+            task.arguments = ["ControlCenter"]
+            try? task.run()
+            task.waitUntilExit()
+            
+            Thread.sleep(forTimeInterval: 0.8)
+            self.runScan()
+            
+            DispatchQueue.main.async {
+                self.sendNotification(
+                    title: "GhostDev: Control Center Restarted",
+                    message: "macOS Control Center was cleanly refreshed. Memory leak resolved."
+                )
+            }
+        }
+    }
+    
     @objc func killSingleItem(_ sender: NSMenuItem) {
         guard let item = sender.representedObject as? ZombieItem else { return }
+        
+        if item.type == "memory-leak" && item.name.contains("Control Center") {
+            restartControlCenterAction()
+            return
+        }
         
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let task = Process()
@@ -267,21 +367,25 @@ class GhostDevMenuDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard let self = self else { return }
             let task = Process()
             let nodePath = self.findNodeExecutable()
-            let home = NSHomeDirectory()
-            let cliScript = "\(home)/.gemini/antigravity/scratch/ghostdev/dist/bin/ghostdev.js"
             
-            if FileManager.default.fileExists(atPath: cliScript) {
-                if nodePath == "/usr/bin/env" {
-                    task.launchPath = "/usr/bin/env"
-                    task.arguments = ["node", cliScript, "reap"]
+            if let cliScript = self.findCliScriptPath() {
+                if cliScript.hasSuffix(".js") {
+                    if nodePath == "/usr/bin/env" {
+                        task.launchPath = "/usr/bin/env"
+                        task.arguments = ["node", cliScript, "reap"]
+                    } else {
+                        task.launchPath = nodePath
+                        task.arguments = [cliScript, "reap"]
+                    }
                 } else {
-                    task.launchPath = nodePath
-                    task.arguments = [cliScript, "reap"]
+                    task.launchPath = cliScript
+                    task.arguments = ["reap"]
                 }
             } else {
                 task.launchPath = "/usr/bin/env"
                 task.arguments = ["ghostdev", "reap"]
             }
+            
             try? task.run()
             task.waitUntilExit()
             
